@@ -42,7 +42,6 @@ class Buy(Request):
     
     @change_state
     def work(self, message):
-        print(self.state)
         if self.state == 0:
             foods = []
             for i in range(3): 
@@ -56,12 +55,11 @@ class Buy(Request):
                             channel=self.channel))
             return State.OK, messages
         if self.state == 1:
-            print('buy state 1')
             try:
                 i = int(message.content[1])
                 food = [food for food in self.foods if food[0] == i][0]
                 name = self.cook.name(food[1], kasus='akkusativ', bestimmter_artikel=False)
-                storage.insert_new_item(self.requester.id, ItemCats.FOOD, food[i])
+                storage.insert_new_item(self.requester.id, ItemCats.FOOD, food[1])
                 user = storage.get_user(self.requester.id)
                 price, _, _ = self.cook.info(food[1])
                 if user.money.val >= price:
@@ -165,11 +163,8 @@ class GetInventory(Request):
     def work(self, message=None):
         if self.state == 0:  
             items = storage.get_items_by_user_id(self.requester.id)
-            names = [item_handler.name(item.category, item.subcategory) for item in items]
-
-            answer = '' 
-            for name in names: 
-                answer.join(f'• {name}\n')
+            names = [item_handler.name(item) for item in items]
+            answer = ''.join([f'• {name}\n' for name in names])
             return State.OK, Message(
                 content=f'```{answer}```',
                 channel=self.channel

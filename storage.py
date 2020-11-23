@@ -83,6 +83,10 @@ class Storage:
         ]
     
     def construct_items(self): 
+
+        for i in inventoryframe.index:
+            print(i)
+
         return [
             Item(
                 inventoryframe['user_id'][i], 
@@ -114,7 +118,7 @@ class Storage:
             state
         ]
         row_df = pd.DataFrame([row], columns=['user_id', 'typus', 'state'])
-        jobframe = pd.concat([row_df, jobframe], ignore_index=False)
+        jobframe = pd.concat([row_df, jobframe], ignore_index=True)
         self.save_df(jobframe, 'data/jobs.csv')
         self.jobs = self.construct_jobs()
     
@@ -127,10 +131,9 @@ class Storage:
             subcategory
         ]
         row_df = pd.DataFrame([row], columns=['user_id', 'category', 'subcategory'])
-        inventoryframe = pd.concat([row_df, inventoryframe], ignore_index=False)
+        inventoryframe = pd.concat([row_df, inventoryframe], ignore_index=True)
         self.save_df(inventoryframe, 'data/inventory.csv')
         self.items = self.construct_items()
-        print(self.items, 'halolo')
 
 
     def get_job_by_user_id(self, user_id):
@@ -139,8 +142,7 @@ class Storage:
                 return job
 
     def get_items_by_user_id(self, user_id):
-        return [item for item in self.items if item.user_id.val == user_id]
-
+        return [item for item in self.items if item.user_id.val == user_id]  
 
     def del_job(self, job): 
         global jobframe
