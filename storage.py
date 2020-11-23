@@ -87,7 +87,7 @@ class Storage:
             Item(
                 inventoryframe['user_id'][i], 
                 inventoryframe['category'][i],
-                inventoryframe['subcategory'][i]
+                inventoryframe['subcategory'][i], i
             ) for i in inventoryframe.index
         ]
 
@@ -127,7 +127,7 @@ class Storage:
             subcategory
         ]
         row_df = pd.DataFrame([row], columns=['user_id', 'category', 'subcategory'])
-        subcategory = pd.concat([row_df, inventoryframe], ignore_index=False)
+        inventoryframe = pd.concat([row_df, inventoryframe], ignore_index=False)
         self.save_df(inventoryframe, 'data/inventory.csv')
         self.items = self.construct_items()
         print(self.items, 'halolo')

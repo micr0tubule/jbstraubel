@@ -56,11 +56,11 @@ class Buy(Request):
                             channel=self.channel))
             return State.OK, messages
         if self.state == 1:
+            print('buy state 1')
             try:
                 i = int(message.content[1])
                 food = [food for food in self.foods if food[0] == i][0]
                 name = self.cook.name(food[1], kasus='akkusativ', bestimmter_artikel=False)
-                print(self.requester.id)
                 storage.insert_new_item(self.requester.id, ItemCats.FOOD, food[i])
                 user = storage.get_user(self.requester.id)
                 price, _, _ = self.cook.info(food[1])
