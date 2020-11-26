@@ -20,6 +20,7 @@ class Postman:
         html = requests.get('https://news.ycombinator.com/news?p=1').text
         soup = BeautifulSoup(html, 'html.parser')
         article = soup.findAll("a", {"class": "storylink"})[0]
+        print(article.attrs['href'])
         if not self.isposted(article):
             storage.insert_new_article(article.attrs['href'])
             return article

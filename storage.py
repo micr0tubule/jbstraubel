@@ -3,7 +3,7 @@ import pandas as pd
 from global_vars import Role, params
 import random
 
-cwd = os.getcwd() + '\\'
+cwd = os.getcwd() + '/'
 userframe = pd.read_csv('data/users.csv')
 jobframe = pd.read_csv('data/jobs.csv')
 inventoryframe = pd.read_csv('data/inventory.csv')
