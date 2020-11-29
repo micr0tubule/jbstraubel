@@ -15,18 +15,18 @@ TOKEN = 'NzcxNDk1NDY5MjEyODkzMjA1.X5s9JQ.VmWitVHPynJ_VKozTM9IDepU-94'
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
+
 cx = CommandExecuter(client)
-logger = Logger(client, cx)
 observer = Observer(client)
+postman = Postman(client)
+logger = Logger(client, cx)
 
 @client.event
 async def on_ready():
-    channel = discord.utils.get(client.guilds[0].channels, name='hacker-news')
-    postman = Postman(channel)
-    logger.start()
+    await logger.start()
     postman.start()
     while True:
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(0.5)
         for message in communicator.messages:
             if type(message.content) != str:
                 with BytesIO() as image_bytes:
@@ -47,4 +47,19 @@ async def on_message(message):
     if category[0][0] == '!':
         if not cx.work(message): 
             cx.execute(message)
+
+@client.event
+async def on_member_update(before, after): 
+    await logger.update_onlineticker(before.status, after.status)
+
+
+@client.event 
+async def on_member_join(member): 
+    await logger.update_memberticker(1)
+
+@client.event
+async def on_member_leave(member): 
+    await logger.update_memberticker(-1)
+
+
 client.run(TOKEN)

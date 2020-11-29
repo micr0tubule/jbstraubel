@@ -30,9 +30,7 @@ class Observer:
         
         for user in storage.users: 
             try:
-                print(user.work_done.val)
                 if user.work_done.val % salary_threshold == 0 and user.work_done.val != 0: 
-                    print(user.money.val + salary_of(user.role.val))
                     user.money(user.money.val + salary_of(user.role.val))
                     dcuser = self.client_reference.guilds[0].get_member(user.id.val)
                     channel = discord.utils.get(self.client_reference.guilds[0].channels, name='bot')

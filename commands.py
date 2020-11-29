@@ -1,8 +1,10 @@
 from storage import storage
 from global_vars import salary_of, Message
-from botrequests import Buy, Salary, Balance, GetTask, GetInventory 
+from botrequests import Buy, Salary, Balance, GetTask, GetInventory
+from casino import Casino
 from communicator import Communicator
 import time
+import discord
 
 communicator = Communicator()
 
@@ -25,8 +27,9 @@ class CommandExecuter:
         '''
         checks if message's author is in requests
         '''
+        self.casinochannel = discord.utils.get(self.client.guilds[0].channels, name='☘-casino') 
         for request in self.requests:
-            if request.requester == message.author and request.channel == message.channel: 
+            if (request.requester == message.author and request.channel == message.channel) or (type(request) == Casino and request.channel == self.casinochannel): 
                 try:
                     answer = request.work(message)
                     if answer and type(answer) == Message or type(answer) == list:
@@ -40,6 +43,7 @@ class CommandExecuter:
                     print(e)
                     self.requests.remove(request)
                     del(request)
+            
         return False
 
 
@@ -55,5 +59,7 @@ class CommandExecuter:
             self.requests.append(GetTask(message, self.client))
         elif command == 'inventory': 
             self.requests.append(GetInventory(message))
+        elif command == 'blackjack': 
+            self.requests.append(Casino(message, self.client))
 
         self.work(message)

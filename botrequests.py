@@ -24,6 +24,7 @@ def change_state(function):
         state, payload = function(self, message)
         if state == State.OK:
             self.state += 1
+            print('added 1 to state of ', type(self), self.state)
             self.done = self.state == self.complete
         elif state == State.FAILED:
             self.done = True
@@ -169,5 +170,3 @@ class GetInventory(Request):
                 content=f'```{answer}```',
                 channel=self.channel
             )
-
-

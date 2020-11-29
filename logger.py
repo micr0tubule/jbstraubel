@@ -1,4 +1,5 @@
 from discord import Guild
+import discord
 import time 
 from storage import storage
 from threading import Thread 
@@ -6,26 +7,21 @@ import time
 import datetime
 from global_vars import LOG_TIME, AVAILABLE_TASKS_NUM, role, Tasks
 import random 
+import asyncio
 
 class Logger:
     def __init__(self, client, cx):
-        self.client = client
+        self.client_reference = client
         self.cx = cx
+        
 
     def log_users(self): 
-        storage.update_users([member.id for member in self.client.guilds[0].members])
+        storage.update_users([member.id for member in self.client_reference.guilds[0].members])
         for user in storage.users:       
-            dcuser = self.client.guilds[0].get_member(user.id.val)
+            dcuser = self.client_reference.guilds[0].get_member(user.id.val)
             if dcuser:    
                 user.role(max([role(r.name) for r in dcuser.roles]))
     
-    def check_if_work_finished(self):
-        pass 
-
-
-    def start(self): 
-        self.log_thread = Thread(target=self.log_loop)
-        self.log_thread.start()
 
     def renew_tasks(self):
         now = datetime.datetime.now()
@@ -40,6 +36,59 @@ class Logger:
         while True:
             self.log_users()
             self.renew_tasks()
-            self.check_if_work_finished()
             time.sleep(LOG_TIME)
+
+
+    def get_online_members(self):
+        online = 0 
+        for member in self.client_reference.guilds[0].members: 
+            if str(member.status) != 'offline': 
+                online += 1 
+        return online
+
+
+    async def start(self): 
+        self.online_channel = discord.utils.get(self.client_reference.guilds[0].channels, name='online')
+        self.member_channel = discord.utils.get(self.client_reference.guilds[0].channels, name='mitarbeiter')
+
+        self.online_members = self.get_online_members()
+        await self.set_onlineticker()
+
+        self.members = len(self.client_reference.guilds[0].members)
+        await self.set_memberticker()
+
+        self.log_thread = Thread(target=self.log_loop)
+        self.log_thread.start()
+        print('logger is logging..')
+
+
+    async def set_onlineticker(self): 
+        string = f'🟢 | online: {self.online_members}'
+        await self.online_channel.edit(name=string)
+
+    async def update_onlineticker(self, os, ns):
+        if str(os) == 'offline': 
+            self.online_members += 1  
+        if str(ns) == 'offline': 
+            self.online_members -= 1
+        string = f'🟢 | online: {self.online_members}'
+        await self.online_channel.edit(name=string)
+
+    async def set_memberticker(self):
+        print('setting memberticker: ', self.members)
+        string = f'👥 | mitarbeiter: {self.members}' 
+        await self.member_channel.edit(name=string)
+
+    async def update_memberticker(self, state):
+        '''
+        state can be either:  
+        - 1 for member joined 
+        - -1 for member left 
+        '''
+
+        self.members += state 
+        string = f'👥 | mitarbeiter: {self.members}'
+        await self.member_channel.edit(name=string)
+
+
 

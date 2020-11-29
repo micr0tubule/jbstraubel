@@ -102,6 +102,8 @@ params = {
 LOG_TIME = 5
 AVAILABLE_TASKS_NUM = 5
 
+NEWS_TIME = 100
+
 def message_of(request, state, var):
     return {
         'salary': [f'```Ihr Gehalt betraegt {var}$.```'],
