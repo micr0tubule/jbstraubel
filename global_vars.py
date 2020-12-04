@@ -1,7 +1,5 @@
 import random
 
-
-
 salary_threshold = 1
 
 class Role:
@@ -112,7 +110,7 @@ def message_of(request, state, var):
         'gettask': {
             0:f'```{var}```', 
             1:f'```du hast {var} gewaehlt.```', 
-            'A':f'```u hast bereits eine laufende Aufgabe: {var}```'
+            'A':f'```du hast bereits eine laufende Aufgabe: {var}```'
             }
     }.get(request)[state]
 
@@ -122,9 +120,11 @@ class State:
     OK = 1
     NO_UPDATE = 2
     FAILED = 3
+    SKIP = 4
 
 class ItemCats: 
     FOOD = 1
+    POSSESSION = 2
 
 class Food: 
     CORN_DOG = 1
@@ -133,4 +133,10 @@ class Food:
     CRAZY_HAMBURGER = 4
     BANANA = 5
     HOTDOG = 6
+    ROASTED_ALMONDS = 7
+    CHILDREN_TEA = 8
+    BAKED_APPLE = 9
+    CANDIED_APPLE = 10
 
+class Possession: 
+    HOUSE = 1

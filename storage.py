@@ -1,6 +1,6 @@
 import os 
 import pandas as pd 
-from global_vars import Role, params
+from global_vars import Role, params, ItemCats
 import random
 
 cwd = os.getcwd() + '/'
@@ -59,6 +59,11 @@ class Article(object):
         def __getattribute__(self, attr): 
             return object.__getattribute__(self, attr)
 
+# class Possession(object): 
+#     def __init__(self, user_id, id, pos):
+#         self.user_id = val(user_id, 'user_id', pos, possessionframe)
+#         self.id = val(id, 'id', pos, possessionframe)
+
     
 class Storage: 
     def __init__(self):
@@ -71,6 +76,8 @@ class Storage:
     def save_df(self, df, filename):
         df.to_csv(cwd+filename, index=False)
 
+    def get(self, category):
+        return [item for item in self.items if item.category.val == category]  
         
     def construct_users(self):
         return [
@@ -164,7 +171,7 @@ class Storage:
                 return job
 
     def get_items_by_user_id(self, user_id):
-        return [item for item in self.items if item.user_id.val == user_id]  
+        return [item for item in self.items if item.user_id.val == str(user_id)]  
 
     def del_job(self, job): 
         global jobframe

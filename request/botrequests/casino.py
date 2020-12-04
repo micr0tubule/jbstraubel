@@ -1,9 +1,9 @@
+from ..request import Request, change_state
 import random 
 from global_vars import Message
 import discord 
 from functools import singledispatch
 from storage import storage
-from botrequests import Request, change_state
 from global_vars import State
 
 class Hand: 
@@ -16,10 +16,11 @@ class Casino(Request):
     def __init__(self, message, client):
         super().__init__(5, message)
         self.client_reference = client
-        self.channel = discord.utils.get(client.guilds[0].channels, name='☘-casino')         
+        self.channel = discord.utils.get(client.guilds[0].channels, id=783111605289353257)         
         self.hands = []
         self.dealer_hand = self.givecards(Hand())
         self.pointer = 0
+        print('heloo')
 
 
     def givecards(self, hand):
@@ -108,7 +109,10 @@ class Casino(Request):
     @change_state
     def work(self, message): 
         if self.state == 0:
-
+            if message.content == '!blackjack': 
+                return State.NO_UPDATE, Message(
+                    content='waiting for players', 
+                    channel=self.channel)
             if message.content == '!join': 
                 player = storage.get_user(message.author.id)
                 join_validation, payload = self.validate_join(player)
@@ -118,7 +122,7 @@ class Casino(Request):
                         content=f'{len(self.hands)}/5 Spieler!',
                         channel=self.channel)
                 else: 
-                    return payload
+                    return State.NO_UPDATE, payload
 
             elif message.content == '!start' and len(self.hands) >= 1:
                 first = self.client_reference.guilds[0].get_member(self.hands[self.pointer].player.id.val).name
@@ -132,9 +136,7 @@ class Casino(Request):
                     channel=self.channel) 
                 ]
             else: 
-                return State.NO_UPDATE, Message(
-                    content='warten auf Spieler..',
-                    channel=self.channel)
+                return State.SKIP, None
                     
         elif self.state == 1:
             try: 

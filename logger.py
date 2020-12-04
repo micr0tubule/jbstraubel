@@ -47,22 +47,18 @@ class Logger:
         return online
 
 
-    async def start(self): 
-        self.online_channel = discord.utils.get(self.client_reference.guilds[0].channels, name='online')
-        self.member_channel = discord.utils.get(self.client_reference.guilds[0].channels, name='mitarbeiter')
-
+    def start(self): 
+        self.online_channel = discord.utils.get(self.client_reference.guilds[0].channels, id=782736135826702336)
+        self.member_channel = discord.utils.get(self.client_reference.guilds[0].channels, id=782748452219650108)
         self.online_members = self.get_online_members()
-        await self.set_onlineticker()
-
         self.members = len(self.client_reference.guilds[0].members)
-        await self.set_memberticker()
-
         self.log_thread = Thread(target=self.log_loop)
         self.log_thread.start()
         print('logger is logging..')
 
 
     async def set_onlineticker(self): 
+        await asyncio.sleep(0.2)
         string = f'🟢 | online: {self.online_members}'
         await self.online_channel.edit(name=string)
 
@@ -77,6 +73,7 @@ class Logger:
     async def set_memberticker(self):
         print('setting memberticker: ', self.members)
         string = f'👥 | mitarbeiter: {self.members}' 
+        await asyncio.sleep(0.2)
         await self.member_channel.edit(name=string)
 
     async def update_memberticker(self, state):

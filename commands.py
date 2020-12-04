@@ -1,10 +1,19 @@
+import discord
 from storage import storage
 from global_vars import salary_of, Message
-from botrequests import Buy, Salary, Balance, GetTask, GetInventory
-from casino import Casino
 from communicator import Communicator
 import time
-import discord
+from functools import singledispatch
+
+from request.botrequests import Casino
+from request.botrequests import GreetMember
+from request.botrequests import Buy
+from request.botrequests import Casino
+from request.botrequests import GetTask
+from request.botrequests import GetInventory
+from request.botrequests import Balance
+from request.botrequests import Salary
+from request.botrequests import AmongUsMaps
 
 communicator = Communicator()
 
@@ -13,38 +22,56 @@ class CommandExecuter:
         self.client = client
         self.requests = []
 
-    def pay_user(self, user):
-        user.money += salary_of(user.role.val)
-        user.last_time_paid = time.now()
+        self.__init_handle_request__()
+
+    def __init_handle_request__(self):
+        self.handle_request = singledispatch(self.handle_request)
+        self.handle_request.register(Casino, self.handle_casino)
+        self.handle_request.register(GreetMember, self.handle_greetmember)
+
+    def handle_request(self, request): 
+        if request.requester == request.payload.author and request.channel == request.payload.channel: 
+            result = request.work(request.payload)
+            return result
+    
+    def handle_casino(self, request): 
+        result = request.work(request.payload)
+        return result 
+
+    def handle_greetmember(self, request): 
+        result = request.work(request.payload)
+        return result
+
+    def handle_christmas(self, request): 
+        if request.payload.channel == request.channel: 
+            result = request.work(request.payload)
+            return result 
 
     def process_message(self, message): 
         splitted_message = message.content.split()
         command = splitted_message[0][1:]
-        params = message[1:] if len(splitted_message) > 1 else None
+        params = message.content[1:] if len(splitted_message) > 1 else None
         return command, params
 
-    def work(self, message):
+    def work(self, payload=None):
         '''
         checks if message's author is in requests
         '''
-        self.casinochannel = discord.utils.get(self.client.guilds[0].channels, name='☘-casino') 
         for request in self.requests:
-            if (request.requester == message.author and request.channel == message.channel) or (type(request) == Casino and request.channel == self.casinochannel): 
-                try:
-                    answer = request.work(message)
-                    if answer and type(answer) == Message or type(answer) == list:
-                        communicator.append(answer)                   
-                    if not answer or request.done:
-                        print('no answer or request done')
-                        self.requests.remove(request)
-                        del(request)
-                    return True
-                except Exception as e:
-                    print(e)
-                    self.requests.remove(request)
-                    del(request)
-            
-        return False
+            request.attach_payload(payload)
+            triggered, result = self.handle_request(request)
+            if request.done:
+                self.requests.remove(request) 
+            if result and not triggered: 
+                communicator.append(result)
+            if triggered: 
+                communicator.append(result)
+                return True
+
+    def execute_greet_member(self, member):
+        self.requests.append(GreetMember(member, self.client)) 
+        self.work()
+
 
 
     def execute(self, message):
@@ -61,5 +88,7 @@ class CommandExecuter:
             self.requests.append(GetInventory(message))
         elif command == 'blackjack': 
             self.requests.append(Casino(message, self.client))
-
+        elif command == 'maps': 
+            self.requests.append(AmongUsMaps(message))
+        
         self.work(message)

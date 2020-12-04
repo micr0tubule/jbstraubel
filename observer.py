@@ -20,7 +20,7 @@ class Observer:
             if task.user == message.author.id:
                 job = storage.get_job_by_user_id(task.user)
                 result = task.validate_work(message=message)
-                if result and type(result) == Message:
+                if type(result) == Message:
                     communicator.append(result)
                 if not result or task.done:
                     storage.del_job(job)
@@ -33,7 +33,7 @@ class Observer:
                 if user.work_done.val % salary_threshold == 0 and user.work_done.val != 0: 
                     user.money(user.money.val + salary_of(user.role.val))
                     dcuser = self.client_reference.guilds[0].get_member(user.id.val)
-                    channel = discord.utils.get(self.client_reference.guilds[0].channels, name='bot')
+                    channel = discord.utils.get(self.client_reference.guilds[0].channels, name='straubel')
                     communicator.append(Message(
                         content=f"```hey @{dcuser.name}!\ndu warst fleißig, du erhälst {salary_of(user.role.val)}$! ```", 
                         channel=channel))

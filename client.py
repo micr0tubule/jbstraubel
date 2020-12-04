@@ -23,30 +23,35 @@ logger = Logger(client, cx)
 
 @client.event
 async def on_ready():
-    await logger.start()
+    logger.start()
     postman.start()
     while True:
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.2)
         for message in communicator.messages:
-            if type(message.content) != str:
-                with BytesIO() as image_bytes:
-                    message.content.save(image_bytes, 'PNG')
-                    image_bytes.seek(0)
-                    await message.channel.send(file=discord.File(fp=image_bytes, filename ='image.png'))
-            else: 
-                await message.channel.send(message.content)
-            communicator.messages.remove(message)
-            del(message)
-
+            try: 
+                if type(message.content) == discord.Embed: 
+                    await message.channel.send(embed=message.content)
+                elif type(message.content) != str:
+                    with BytesIO() as image_bytes:
+                        message.content.save(image_bytes, 'PNG')
+                        image_bytes.seek(0)
+                        await message.channel.send(file=discord.File(fp=image_bytes, filename ='image.png'))
+                else: 
+                    await message.channel.send(message.content)
+                communicator.messages.remove(message)
+                del(message)
+            except Exception as e: 
+                print(e)
+                pass 
 @client.event
 async def on_message(message):
     if message.author.bot: 
         return
-    observer.check_task(message)
     category = message.content.split() 
     if category[0][0] == '!':
         if not cx.work(message): 
             cx.execute(message)
+    observer.check_task(message)
 
 @client.event
 async def on_member_update(before, after): 
@@ -54,8 +59,15 @@ async def on_member_update(before, after):
 
 
 @client.event 
-async def on_member_join(member): 
-    await logger.update_memberticker(1)
+async def on_member_join(member):
+    cx.execute_greet_member(member) 
+    try: 
+        starting_role = discord.utils.get(client.guilds[0].roles, name='Praktikant')
+        await member.edit(roles=[starting_role])
+        await logger.update_memberticker(1)
+    except Exception as e: 
+        print(e)
+        pass 
 
 @client.event
 async def on_member_leave(member): 
